@@ -1,0 +1,76 @@
+# Page Pulse
+
+A small web tool that audits any public URL: fetches the page, and returns a JSON report with HTTP status, response time, title, meta description, H1 count, images missing alt text, and approximate word count.
+
+Built for the Digital Heroes SDE (Web) training task.
+
+## Setup
+
+```bash
+npm install
+node server.js
+# server runs on http://localhost:3000
+```
+
+No environment variables or API keys required.
+
+### Running tests
+
+```bash
+node --test tests/audit.test.js
+```
+
+## API contract
+
+### `GET /api/audit?url=<url>`
+
+**Query params**
+- `url` (required) — the target page to audit. Must be a valid `http://` or `https://` URL.
+
+**Success response** — `200 OK`
+```json
+{
+  "url": "https://example.com/",
+  "ok": true,
+  "httpStatus": 200,
+  "responseTimeMs": 134,
+  "pageTitle": "Example Domain",
+  "metaDescription": null,
+  "h1Count": 1,
+  "totalImages": 0,
+  "imagesMissingAlt": 0,
+  "wordCount": 28
+}
+```
+
+**Failure response (target page unreachable, times out, returns a bad status, or isn't HTML)** — still `200 OK`, because the *audit itself* succeeded even though the *target* failed:
+```json
+{
+  "url": "https://example.com/",
+  "ok": false,
+  "error": "Request timed out",
+  "httpStatus": null,
+  "responseTimeMs": 8004
+}
+```
+
+**Client error (malformed/missing URL)** — `400 Bad Request`
+```json
+{ "ok": false, "error": "Invalid URL format" }
+```
+
+## Design decisions
+
+1. **`ok: false` failures return HTTP 200, not a 4xx/5xx.** The audit endpoint's job is to report on a URL, not to be that URL. If `github.com` times out, that's a successful audit with a negative finding — the client asked "how is this page doing?" and got a real answer. Only genuinely bad *requests to this API* (missing/malformed `url` param) get a 400. This keeps the frontend's error-handling logic simple: check `data.ok`, not the HTTP status of my own endpoint.
+
+2. **Parsing logic is a pure function, separate from the network call.** `parseHtml(html)` takes a string and returns the report fields with no I/O. `auditUrl()` handles fetching and wraps it. This is what makes the test suite possible without mocking HTTP or hitting real servers in tests — I can feed `parseHtml` a fixed HTML string and assert on the output deterministically.
+
+3. **`validateStatus: () => true` on the axios call, instead of letting axios throw on non-2xx.** By default axios throws on 4xx/5xx, which would force me to catch-and-reclassify errors that aren't actually failures of the fetch itself. Telling axios to never throw on status and checking `response.status` manually keeps the "timeout vs. bad URL vs. bad HTTP status vs. non-HTML" cases cleanly separated in one place instead of split across a try/catch and an if-block.
+
+## What I'd change with another day
+
+The word count is a rough whitespace-split approximation and doesn't handle non-Latin scripts or heavily componentized SPAs where content loads client-side after the initial HTML (this tool only sees server-rendered HTML, not post-JS-execution DOM). With more time I'd add a headless-browser fallback (e.g. Playwright) for pages that return near-empty bodies, and a proper tokenizer for word count instead of a naive split.
+
+## AI usage disclosure
+
+I used Claude to scaffold the Express route structure and the test file boilerplate, then reviewed and adjusted the error-handling logic (particularly the "ok:false returns 200" decision above) myself.
