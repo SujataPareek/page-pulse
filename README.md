@@ -1,19 +1,39 @@
 # Page Pulse
 
-A small web tool that audits any public URL: fetches the page, and returns a JSON report with HTTP status, response time, title, meta description, H1 count, images missing alt text, and approximate word count.
+A lightweight web tool that audits any public URL by fetching its HTML and generating a structural and performance report.
 
-Built for the Digital Heroes SDE (Web) training task.
+**Live Demo:** https://page-pulse-n8mn.onrender.com
+
+**GitHub Repository:** https://github.com/SujataPareek/page-pulse
+
+Built as part of the Digital Heroes Software Development Internship assessment.
+
+## Features
+
+- Analyze any public HTTP/HTTPS webpage
+- Measure HTTP status and response time
+- Extract page title and meta description
+- Count H1 headings
+- Detect images missing alt text
+- Estimate page word count
+- Graceful handling of invalid URLs, timeouts, and non-HTML responses
+
 
 ## Setup
 
-```bash
+Requirements:
+- Node.js 18 or later
+
+Install dependencies:
+
 npm install
+
+Start the server:
+
 node server.js
-# server runs on http://localhost:3000
-```
 
-No environment variables or API keys required.
-
+The application runs at:
+http://localhost:3000
 ### Running tests
 
 ```bash
@@ -71,6 +91,6 @@ node --test tests/audit.test.js
 
 The word count is a rough whitespace-split approximation and doesn't handle non-Latin scripts or heavily componentized SPAs where content loads client-side after the initial HTML (this tool only sees server-rendered HTML, not post-JS-execution DOM). With more time I'd add a headless-browser fallback (e.g. Playwright) for pages that return near-empty bodies, and a proper tokenizer for word count instead of a naive split.
 
-## AI usage disclosure
+## AI usage 
 
 I used AI tools as learning and development assistants throughout this assignment. Claude helped me understand the project requirements, build the application, and implement the code. ChatGPT assisted me with brainstorming the project structure, reviewing the overall workflow, and guiding me through the GitHub and Render deployment process. I personally tested the application, verified different scenarios, completed the deployment, and reviewed the implementation to understand how each component works before submission.
