@@ -73,4 +73,4 @@ The word count is a rough whitespace-split approximation and doesn't handle non-
 
 ## AI usage disclosure
 
-I used Claude to scaffold the Express route structure and the test file boilerplate, then reviewed and adjusted the error-handling logic (particularly the "ok:false returns 200" decision above) myself.
+I used AI tools as learning and development assistants throughout this assignment. Claude helped me understand the project requirements, build the application, and implement the code. ChatGPT assisted me with brainstorming the project structure, reviewing the overall workflow, and guiding me through the GitHub and Render deployment process. I personally tested the application, verified different scenarios, completed the deployment, and reviewed the implementation to understand how each component works before submission.
